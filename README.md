@@ -8,13 +8,8 @@ Backend (Capa de Aplicación): Desarrollado en Node.js (Express) / Python. Conti
 Base de Datos (Capa de Persistencia): PostgreSQL / MySQL. Almacena la información de forma relacional y segura.
 
 Diagrama de Arquitectura (PlantUML)
-mermaid
-graph TD
-    A[Frontend: Cliente] -->|Peticiones HTTP/JSON| B[Backend: API REST]
-    B -->|Consultas SQL| C[(Base de Datos Relacional)]
-    C -->|Retorna Datos| B
-    B -->|Respuesta JSON| A
-Usa el código con precaución.
+
+
 
 📊 Modelo de Datos
 El sistema se basa en tres entidades principales con relaciones relacionales sólidas:
@@ -54,3 +49,5 @@ CREATE TABLE Solicitudes (
     FOREIGN KEY (id_usuario) REFERENCES Usuarios(id_usuario),
     FOREIGN KEY (id_mascota) REFERENCES Mascotas(id_mascota)
 );
+
+
