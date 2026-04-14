@@ -1,53 +1,70 @@
-🐾 PetAdopt: Sistema Integral de Adopción
-PetAdopt es una plataforma web diseñada para digitalizar y agilizar el proceso de adopción de mascotas. El sistema permite gestionar el catálogo de animales, registrar adoptantes y administrar el flujo de solicitudes mediante una arquitectura de tres capas.
-
-🏗️ Arquitectura del Proyecto
-El sistema sigue un patrón de Arquitectura de Tres Capas (Client-Server), garantizando la separación de responsabilidades:
-Frontend (Capa de Presentación): Desarrollado en React / Vue.js. Maneja la interfaz de usuario y el consumo de la API.
-Backend (Capa de Aplicación): Desarrollado en Node.js (Express) / Python. Contiene la lógica de negocio y los controladores REST.
-Base de Datos (Capa de Persistencia): PostgreSQL / MySQL. Almacena la información de forma relacional y segura.
-
-Diagrama de Arquitectura (PlantUML)
+# 🐍 Backend - PetAdopt - Bruno Romero(UM) - PROGRAMACION 1
 
 
+El sistema permite:
+- Gestionar usuarios
+- Administrar datos desde el panel de Django
+- Servir como base para una API REST
 
-📊 Modelo de Datos
-El sistema se basa en tres entidades principales con relaciones relacionales sólidas:
-Usuarios: Almacena adoptantes y administradores.
-Mascotas: Registro detallado de animales (especie, edad, estado).
-Solicitudes: Entidad intermedia que vincula a un Usuario con una Mascota para formalizar la adopción.
+---
 
-Relaciones:
-Usuario (1) : (N) Solicitudes: Un usuario puede aplicar para adoptar varias mascotas.
-Mascota (1) : (N) Solicitudes: Una mascota puede recibir múltiples interesados hasta que se apruebe uno.
-🛠️ Estructura de las Tablas (SQL)
-sql
--- Tabla de Usuarios
-CREATE TABLE Usuarios (
-    id_usuario INT PRIMARY KEY AUTO_INCREMENT,
-    nombre VARCHAR(100),
-    email VARCHAR(100) UNIQUE,
-    telefono VARCHAR(20)
-);
+## ⚙️ Tecnologías utilizadas
+- Python 3
+- Django
+- Django REST Framework
+- SQLite (base de datos inicial)
 
--- Tabla de Mascotas
-CREATE TABLE Mascotas (
-    id_mascota INT PRIMARY KEY AUTO_INCREMENT,
-    nombre VARCHAR(50),
-    especie VARCHAR(50),
-    edad INT,
-    estado VARCHAR(20) DEFAULT 'Disponible' -- Disponible, Adoptado, En Proceso
-);
+---
 
--- Tabla de Solicitudes (Relación Intermedia)
-CREATE TABLE Solicitudes (
-    id_solicitud INT PRIMARY KEY AUTO_INCREMENT,
-    id_usuario INT,
-    id_mascota INT,
-    fecha_solicitud DATE,
-    estado_solicitud VARCHAR(20) DEFAULT 'Pendiente',
-    FOREIGN KEY (id_usuario) REFERENCES Usuarios(id_usuario),
-    FOREIGN KEY (id_mascota) REFERENCES Mascotas(id_mascota)
-);
+## 🚀 Instalación
 
+1. Clonar el repositorio:
+git clone https://github.com/romerobruno/PetAdopt.git
+
+2. Entrar al proyecto:
+cd PetAdopt
+
+3. Crear entorno virtual:
+py -m venv venv
+
+4. Activar entorno:
+venv\Scripts\Activate.ps1
+
+5. Instalar dependencias:
+py -m pip install -r requirements.txt
+
+6. Aplicar migraciones:
+py manage.py migrate
+
+7. Crear superusuario:
+py manage.py createsuperuser
+
+---
+
+## ▶️ Ejecución
+
+Levantar el servidor:
+py manage.py runserver
+
+Acceder a:
+- http://127.0.0.1:8000/
+- http://127.0.0.1:8000/admin/
+
+---
+
+## 📁 Estructura del proyecto
+
+- config/ → configuración principal
+- core/ → aplicación base
+- manage.py → gestor de comandos
+
+---
+
+## 🧠 Notas
+Este proyecto es la base para futuras funcionalidades como:
+- Modelado de datos
+- API REST
+- Conexión con frontend
+
+---
 
