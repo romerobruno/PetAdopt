@@ -1,8 +1,5 @@
 # 🐍 Backend - PetAdopt - Bruno Romero(UM) - PROGRAMACION 1
 
-## 📌 Descripción
-Este proyecto corresponde al backend desarrollado con Django y Django REST Framework.  
-Forma parte del trabajo práctico inicial para configurar un entorno de desarrollo funcional.
 
 El sistema permite:
 - Gestionar usuarios
