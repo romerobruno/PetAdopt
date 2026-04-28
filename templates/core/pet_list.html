@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Adopción de Mascotas</h1>
+<ul>
+  {% for pet in pets %}
+    <li>{{ pet.name }} ({{ pet.species }}) - {{ pet.age }} años</li>
+  {% empty %}
+    <li>No hay mascotas disponibles.</li>
+  {% endfor %}
+</ul>
+{% endblock %}
