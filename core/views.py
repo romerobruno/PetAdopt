@@ -1,7 +1,19 @@
 # core/views.py
-from django.shortcuts import render
-from .models import Pet
+from rest_framework import viewsets
+from .models import Pet, Adopter, AdoptionRequest
+from .serializers import PetSerializer, AdopterSerializer, AdoptionRequestSerializer
 
-def pet_list(request):
-    pets = Pet.objects.all()
-    return render(request, 'core/pet_list.html', {'pets': pets})
+
+class PetViewSet(viewsets.ModelViewSet):
+    queryset = Pet.objects.all()
+    serializer_class = PetSerializer
+
+
+class AdopterViewSet(viewsets.ModelViewSet):
+    queryset = Adopter.objects.all()
+    serializer_class = AdopterSerializer
+
+
+class AdoptionRequestViewSet(viewsets.ModelViewSet):
+    queryset = AdoptionRequest.objects.all()
+    serializer_class = AdoptionRequestSerializer
