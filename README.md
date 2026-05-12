@@ -1,4 +1,4 @@
-# Backend - PetAdopt - Bruno Romero (UM) - Programacion 1
+# PetAdopt - Bruno Romero (UM) - Programacion 1
 
 ## Descripcion
 Backend desarrollado con Django y Django REST Framework para gestionar el flujo base de adopciones.
