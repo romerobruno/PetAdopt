@@ -1,0 +1,150 @@
+{
+  "info": {
+    "name": "PetAdopt TP3 - JWT y Roles",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "refresh_token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1 - Registro CLIENTE",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/users/register/",
+          "host": ["{{base_url}}"],
+          "path": ["api", "users", "register", ""]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"cliente1\",\n  \"email\": \"cliente1@test.com\",\n  \"password\": \"Password123\",\n  \"first_name\": \"Cliente\",\n  \"last_name\": \"Uno\",\n  \"telefono\": \"123456\",\n  \"direccion\": \"Calle 123\"\n}"
+        }
+      }
+    },
+    {
+      "name": "2 - Login JWT",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "pm.collectionVariables.set('access_token', body.access);",
+              "pm.collectionVariables.set('refresh_token', body.refresh);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/token/",
+          "host": ["{{base_url}}"],
+          "path": ["api", "token", ""]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"cliente1\",\n  \"password\": \"Password123\"\n}"
+        }
+      }
+    },
+    {
+      "name": "3 - Perfil con JWT - 200 OK",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{access_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/api/users/profile/",
+          "host": ["{{base_url}}"],
+          "path": ["api", "users", "profile", ""]
+        }
+      }
+    },
+    {
+      "name": "4 - Crear mascota sin token - 401 Unauthorized",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/pets/",
+          "host": ["{{base_url}}"],
+          "path": ["api", "pets", ""]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Luna\",\n  \"species\": \"Perro\",\n  \"breed\": \"Mestiza\",\n  \"age\": 2,\n  \"description\": \"Muy tranquila\"\n}"
+        }
+      }
+    },
+    {
+      "name": "5 - Crear mascota como CLIENTE - 403 Forbidden",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{access_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/pets/",
+          "host": ["{{base_url}}"],
+          "path": ["api", "pets", ""]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Luna\",\n  \"species\": \"Perro\",\n  \"breed\": \"Mestiza\",\n  \"age\": 2,\n  \"description\": \"Muy tranquila\"\n}"
+        }
+      }
+    }
+  ]
+}
