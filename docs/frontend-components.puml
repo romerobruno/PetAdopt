@@ -1,0 +1,32 @@
+@startuml
+title PetAdopt - Diseño propuesto del frontend
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam defaultTextAlignment center
+
+package "PetAdopt Frontend (propuesta para TP6)" {
+  component App
+  component Navbar
+  component Home
+  component Hero
+  component SearchBar
+  component PetList
+  component PetCard
+  component Footer
+
+  App --> Navbar
+  App --> Home
+  App --> Footer
+  Home --> Hero
+  Hero --> SearchBar
+  Home --> PetList
+  PetList --> PetCard
+}
+
+note right of App
+  React + Vite
+  Servidor de desarrollo: localhost:3000
+end note
+
+@enduml
