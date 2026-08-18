@@ -113,6 +113,29 @@
   font-weight: 800;
 }
 
+.auth-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 15% 15%, rgb(25 135 84 / 16%), transparent 25rem),
+    radial-gradient(circle at 90% 85%, rgb(255 193 7 / 18%), transparent 25rem),
+    #f7faf8;
+}
+
+.auth-card {
+  border-top: 0.3rem solid #198754 !important;
+}
+
+.auth-brand:focus-visible {
+  outline: 0.2rem solid rgb(25 135 84 / 35%);
+  outline-offset: 0.3rem;
+  border-radius: 0.25rem;
+}
+
+.demo-credentials {
+  background: #f1f8f4;
+  border: 1px dashed rgb(25 135 84 / 40%);
+}
+
 @media (max-width: 767.98px) {
   .hero-title {
     max-width: 10ch;
