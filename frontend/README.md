@@ -1,16 +1,31 @@
-# React + Vite
+# PetAdopt Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Frontend en React y Bootstrap para la plataforma de adopción PetAdopt.
 
-Currently, two official plugins are available:
+## Requisitos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Node.js 20.19+ o 22.12+
+- npm
 
-## React Compiler
+## Ejecución local
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+npm install
+npm run dev
+```
 
-## Expanding the Oxlint configuration
+La aplicación define las rutas `/`, `/login` y `/register`. La Home (`/`) está protegida y redirige al Login cuando no hay una sesión activa.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## Cuenta de prueba
+
+- Usuario: `demo`
+- Contraseña: `petadopt123`
+
+También es posible crear usuarios desde Registro. Tanto las cuentas nuevas como la sesión se almacenan solamente en memoria: se eliminan al recargar la página, ya que en este trabajo práctico no se conecta el frontend al backend.
+
+## Verificación
+
+```bash
+npm run lint
+npm run build
+```

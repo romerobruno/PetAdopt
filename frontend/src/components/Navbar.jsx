@@ -1,11 +1,22 @@
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/useAuth.js'
+
 function Navbar() {
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login', { replace: true })
+  }
+
   return (
     <nav className="navbar navbar-expand-md bg-white border-bottom sticky-top" aria-label="Navegación principal">
       <div className="container py-2">
-        <a className="navbar-brand d-flex align-items-center gap-2 fw-bold" href="#inicio">
+        <Link className="navbar-brand d-flex align-items-center gap-2 fw-bold" to="/">
           <span className="navbar-brand-mark" aria-hidden="true">♥</span>
           PetAdopt
-        </a>
+        </Link>
 
         <button
           className="navbar-toggler border-0"
@@ -32,6 +43,14 @@ function Navbar() {
             </li>
             <li className="nav-item ms-md-2">
               <a className="btn btn-success px-4" href="#mascotas">Quiero adoptar</a>
+            </li>
+            <li className="nav-item ms-md-2 d-flex align-items-center gap-2">
+              <span className="small text-secondary text-nowrap" title={`Usuario: ${user.username}`}>
+                Hola, {user.name}
+              </span>
+              <button className="btn btn-outline-danger text-nowrap" onClick={handleLogout} type="button">
+                Cerrar sesión
+              </button>
             </li>
           </ul>
         </div>
