@@ -1,19 +1,134 @@
-.app {
-  min-height: 100vh;
+.navbar-brand-mark,
+.footer-brand-mark {
+  width: 2.25rem;
+  height: 2.25rem;
+  display: inline-grid;
+  place-items: center;
+  color: #fff;
+  background: #198754;
+  border-radius: 50%;
+}
+
+.hero-section {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 90% 10%, rgb(255 193 7 / 22%), transparent 26rem),
+    linear-gradient(135deg, #f2fbf6 0%, #fffaf0 100%);
+}
+
+.hero-title {
+  max-width: 12ch;
+  font-size: clamp(2.65rem, 7vw, 5.4rem);
+  line-height: 0.98;
+  letter-spacing: -0.05em;
+}
+
+.hero-copy {
+  max-width: 36rem;
+}
+
+.hero-visual {
+  min-height: 24rem;
+  position: relative;
   display: grid;
-  place-content: center;
-  padding: 2rem;
-  text-align: center;
+  place-items: center;
 }
 
-.app h1 {
-  margin: 0 0 0.75rem;
-  color: #166534;
-  font-size: clamp(2.5rem, 8vw, 4.5rem);
+.hero-circle {
+  width: min(23rem, 78vw);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  border: 1rem solid rgb(25 135 84 / 10%);
+  border-radius: 50%;
+  box-shadow: 0 1.5rem 4rem rgb(27 67 50 / 15%);
 }
 
-.app p {
-  margin: 0;
-  color: #4b5563;
-  font-size: 1.1rem;
+.hero-pet {
+  font-size: clamp(7rem, 20vw, 11rem);
+  filter: drop-shadow(0 1rem 0.8rem rgb(32 61 47 / 18%));
+  transform: translateY(-0.25rem);
+}
+
+.floating-badge {
+  position: absolute;
+  right: 3%;
+  bottom: 12%;
+  max-width: 12rem;
+  background: #fff;
+  box-shadow: 0 1rem 2.5rem rgb(27 67 50 / 15%);
+}
+
+.section-eyebrow {
+  color: #198754;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.pet-card {
+  overflow: hidden;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.pet-card:hover {
+  transform: translateY(-0.35rem);
+  box-shadow: 0 1rem 2.5rem rgb(33 37 41 / 12%) !important;
+}
+
+.pet-card-visual {
+  min-height: 13rem;
+  display: grid;
+  place-items: center;
+  font-size: 6rem;
+}
+
+.pet-card-visual--green {
+  background: #dff5e8;
+}
+
+.pet-card-visual--yellow {
+  background: #fff1c2;
+}
+
+.pet-card-visual--blue {
+  background: #dfefff;
+}
+
+.steps-section {
+  background: #153d2d;
+}
+
+.step-number {
+  width: 3rem;
+  height: 3rem;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  color: #153d2d;
+  background: #ffc107;
+  border-radius: 50%;
+  font-weight: 800;
+}
+
+@media (max-width: 767.98px) {
+  .hero-title {
+    max-width: 10ch;
+  }
+
+  .hero-visual {
+    min-height: 20rem;
+  }
+
+  .floating-badge {
+    right: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pet-card {
+    transition: none;
+  }
 }

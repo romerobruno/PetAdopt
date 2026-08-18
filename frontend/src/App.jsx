@@ -1,12 +1,8 @@
 import './App.css'
+import Home from './views/Home.jsx'
 
 function App() {
-  return (
-    <main className="app">
-      <h1>PetAdopt</h1>
-      <p>Frontend React funcionando correctamente.</p>
-    </main>
-  )
+  return <Home />
 }
 
 export default App
