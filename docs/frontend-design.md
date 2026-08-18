@@ -6,9 +6,11 @@ PetAdopt mantiene el backend Django y el frontend React separados dentro del mis
 
 - **Backend Django:** permanece en la raíz del repositorio. `manage.py` inicia el proyecto configurado en `config/`, mientras que `core/` y `users/` contienen las aplicaciones existentes.
 - **Frontend React:** vive en `frontend/` y usa Vite como servidor de desarrollo y herramienta de construcción. Durante el desarrollo se ejecuta de manera independiente en `http://localhost:3000`.
-- **Integración futura:** React podrá consumir la API HTTP expuesta por Django. Este TP solamente prepara la estructura visual inicial; no agrega todavía esa integración.
+- **Integración futura:** React podrá consumir la API HTTP expuesta por Django. Este TP solamente pone en marcha el cliente y documenta el diseño; no implementa todavía la Home ni la integración con la API.
 
-## Componentes iniciales de la Home
+## Componentes propuestos para la Home
+
+Los siguientes componentes son un bosquejo para el TP6 y trabajos posteriores. No forman parte de la implementación del TP5:
 
 - `App`: composición principal de la aplicación.
 - `Navbar`: identidad y navegación principal.
@@ -21,6 +23,8 @@ PetAdopt mantiene el backend Django y el frontend React separados dentro del mis
 
 ## Diagrama de componentes
 
+El diagrama también está disponible en formato PlantUML editable en [`frontend-components.puml`](frontend-components.puml).
+
 ```mermaid
 flowchart TD
     App[PetAdopt / App] --> Navbar
@@ -32,4 +36,4 @@ flowchart TD
     App --> Footer
 ```
 
-La estructura está pensada como punto de partida y puede ampliarse en próximos trabajos prácticos con rutas, conexión a la API y estado de la aplicación.
+La estructura representa una propuesta de diseño, no componentes implementados en este TP. Podrá desarrollarse en próximos trabajos prácticos junto con las rutas, la conexión a la API y el estado de la aplicación.
