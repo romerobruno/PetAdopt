@@ -5,7 +5,7 @@ Backend desarrollado con Django y Django REST Framework para gestionar el flujo 
 
 Incluye:
 - Panel de administracion de Django
-- API REST para mascotas, adoptantes y solicitudes de adopcion
+- API REST para mascotas y solicitudes de adopcion
 - Documentacion interactiva con Swagger
 - Modelo de usuario personalizado basado en `AbstractUser`
 - Autenticacion JWT y autorizacion por roles
@@ -87,14 +87,14 @@ Campos extra:
 Reglas de acceso implementadas:
 - Lectura de mascotas: publica.
 - Creacion, edicion y borrado de mascotas: solo `ADMIN` o `VENDEDOR` con JWT.
-- Gestion de solicitudes de adopcion: solo `CLIENTE` autenticado. El listado se limita a solicitudes asociadas al email del usuario.
+- Gestion de solicitudes de adopcion: solo `CLIENTE` autenticado. El listado se limita a solicitudes asociadas directamente al usuario autenticado.
 - Registro: crea usuarios como `CLIENTE` por defecto.
 - Perfil: devuelve los datos del usuario autenticado.
 
 ### Adaptacion al dominio del proyecto
 El enunciado menciona productos y carrito como ejemplo de RBAC. En PetAdopt se adapto esa logica al dominio de adopciones:
 - `Pet` representa el recurso equivalente a producto. Por eso su lectura es publica y su creacion, edicion o borrado queda limitada a `ADMIN` o `VENDEDOR`.
-- `AdoptionRequest` representa la gestion exclusiva del cliente autenticado. Por eso solo un usuario con rol `CLIENTE` puede acceder a este flujo, y el listado se filtra por el email del usuario autenticado.
+- `AdoptionRequest` representa la gestion exclusiva del cliente autenticado. Por eso solo un usuario con rol `CLIENTE` puede acceder a este flujo, y cada solicitud se relaciona directamente con el `User` autenticado.
 
 JWT se eligio sobre sesiones tradicionales porque el cliente puede enviar el token en cada request con `Authorization: Bearer <access>`, y el servidor solo valida la firma y expiracion. Esto evita guardar estado de sesion en el servidor y facilita escalar la API. Para logout se usa blacklist de refresh tokens: el access token expira rapido, y el refresh token enviado a `/api/users/logout/` queda invalidado para no poder renovar credenciales.
 
