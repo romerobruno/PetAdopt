@@ -1,19 +1,14 @@
 # core/views.py
 from rest_framework import viewsets
-from .models import Pet, Adopter, AdoptionRequest
+from .models import Pet, AdoptionRequest
 from .permissions import IsAdminOrVendedorForWrite, IsClienteAuthenticated
-from .serializers import PetSerializer, AdopterSerializer, AdoptionRequestSerializer
+from .serializers import PetSerializer, AdoptionRequestSerializer
 
 
 class PetViewSet(viewsets.ModelViewSet):
     queryset = Pet.objects.all()
     serializer_class = PetSerializer
     permission_classes = [IsAdminOrVendedorForWrite]
-
-
-class AdopterViewSet(viewsets.ModelViewSet):
-    queryset = Adopter.objects.all()
-    serializer_class = AdopterSerializer
 
 
 class AdoptionRequestViewSet(viewsets.ModelViewSet):
@@ -25,4 +20,7 @@ class AdoptionRequestViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if not user.is_authenticated:
             return AdoptionRequest.objects.none()
-        return AdoptionRequest.objects.filter(adopter__email=user.email)
+        return AdoptionRequest.objects.filter(user=user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
