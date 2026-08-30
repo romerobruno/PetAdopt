@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 
+
 class Pet(models.Model):
     """Representa una mascota disponible para adopción."""
     name = models.CharField(max_length=50)

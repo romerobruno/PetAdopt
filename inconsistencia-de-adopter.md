@@ -1,5 +1,7 @@
 # Inconsistencia de Adopter
 
+> Estado: la recomendacion de este documento fue implementada. `AdoptionRequest` se relaciona directamente con `User`, el endpoint de `Adopter` fue eliminado y una migracion conserva los datos existentes vinculandolos por email.
+
 ## Problema
 
 El proyecto tiene dos conceptos que hoy se pisan parcialmente:

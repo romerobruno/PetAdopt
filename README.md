@@ -5,7 +5,7 @@ Backend desarrollado con Django y Django REST Framework para gestionar el flujo 
 
 Incluye:
 - Panel de administracion de Django
-- API REST para mascotas y solicitudes de adopcion
+- API REST para mascotas y solicitudes de adopcion vinculadas al usuario autenticado
 - Documentacion interactiva con Swagger
 - Modelo de usuario personalizado basado en `AbstractUser`
 - Autenticacion JWT y autorizacion por roles
@@ -44,7 +44,9 @@ venv\Scripts\Activate.ps1
 py -m pip install -r requirements.txt
 ```
 
-6. Configurar base de datos PostgreSQL en `config/settings.py` (nombre, usuario, password, host y puerto).
+6. Copiar `.env.example` como `.env` y completar los valores locales. Por defecto se usa SQLite en `local.sqlite3`; para PostgreSQL hay que habilitar y completar las variables `DB_*` del ejemplo.
+
+La aplicacion genera una clave efimera si falta `SECRET_KEY` durante el desarrollo. Con `DEBUG=False`, `SECRET_KEY` es obligatoria y el proceso no inicia si no fue configurada.
 
 7. Aplicar migraciones:
 ```bash
@@ -86,8 +88,11 @@ El frontend queda disponible en `http://localhost:3000`. El flujo conectado incl
 - Registro: `POST http://127.0.0.1:8000/api/users/register/`
 - Login JWT: `POST http://127.0.0.1:8000/api/token/`
 - Refresh JWT: `POST http://127.0.0.1:8000/api/token/refresh/`
-- Perfil: `GET http://127.0.0.1:8000/api/users/profile/`
+- Perfil: `GET/PATCH http://127.0.0.1:8000/api/users/profile/`
 - Logout: `POST http://127.0.0.1:8000/api/users/logout/`
+- Solicitudes: `GET/POST http://127.0.0.1:8000/api/adoptionrequests/`
+- Aprobar solicitud: `POST http://127.0.0.1:8000/api/adoptionrequests/{id}/approve/`
+- Rechazar solicitud: `POST http://127.0.0.1:8000/api/adoptionrequests/{id}/reject/`
 - Swagger UI: `http://127.0.0.1:8000/api/docs/`
 - OpenAPI schema: `http://127.0.0.1:8000/api/schema/`
 
@@ -105,14 +110,15 @@ Campos extra:
 Reglas de acceso implementadas:
 - Lectura de mascotas: publica.
 - Creacion, edicion y borrado de mascotas: solo `ADMIN` o `VENDEDOR` con JWT.
-- Gestion de solicitudes de adopcion: solo `CLIENTE` autenticado. El listado se limita a solicitudes asociadas directamente al usuario autenticado.
+- Creacion y edicion de solicitudes de adopcion: solo `CLIENTE` autenticado. Cada solicitud se vincula directamente al usuario y el listado del cliente se limita a sus propias solicitudes.
+- Consulta global y aprobacion/rechazo de solicitudes: `ADMIN` o `VENDEDOR` autenticado.
 - Registro: crea usuarios como `CLIENTE` por defecto.
-- Perfil: devuelve los datos del usuario autenticado.
+- Perfil: permite consultar y actualizar nombre, apellido, telefono y direccion sin permitir cambios de identidad o rol.
 
 ### Adaptacion al dominio del proyecto
 El enunciado menciona productos y carrito como ejemplo de RBAC. En PetAdopt se adapto esa logica al dominio de adopciones:
 - `Pet` representa el recurso equivalente a producto. Por eso su lectura es publica y su creacion, edicion o borrado queda limitada a `ADMIN` o `VENDEDOR`.
-- `AdoptionRequest` representa la gestion exclusiva del cliente autenticado. Por eso solo un usuario con rol `CLIENTE` puede acceder a este flujo, y cada solicitud se relaciona directamente con el `User` autenticado.
+- `AdoptionRequest` pertenece directamente al usuario autenticado. La restriccion unica sobre mascota y usuario impide enviar dos solicitudes para la misma mascota. Los roles `ADMIN` y `VENDEDOR` pueden revisar y resolver las solicitudes.
 
 JWT se eligio sobre sesiones tradicionales porque el cliente puede enviar el token en cada request con `Authorization: Bearer <access>`, y el servidor solo valida la firma y expiracion. Esto evita guardar estado de sesion en el servidor y facilita escalar la API. Para logout se usa blacklist de refresh tokens: el access token expira rapido, y el refresh token enviado a `/api/users/logout/` queda invalidado para no poder renovar credenciales.
 
