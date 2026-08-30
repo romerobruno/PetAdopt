@@ -27,7 +27,7 @@ class AdoptionRequest(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["pet", "user"], name="unique_adoption_request_per_pet_user"),
+            models.UniqueConstraint(fields=["pet", "user"], name="unique_adoption_request_per_user_pet")
         ]
 
     def __str__(self):

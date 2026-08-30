@@ -147,6 +147,24 @@ class AdoptionRequestTests(APITestCase):
         self.assertEqual(adoption_request.user, self.cliente)
         self.assertFalse(adoption_request.is_approved)
 
+    def test_cliente_only_lists_own_adoption_requests(self):
+        other_user = User.objects.create_user(
+            username="otro-cliente",
+            email="otro-cliente@example.com",
+            password="Password123",
+            role=User.Roles.CLIENTE,
+        )
+        other_pet = Pet.objects.create(name="Luna", species="Perro", age=2)
+        AdoptionRequest.objects.create(pet=self.pet, user=self.cliente)
+        AdoptionRequest.objects.create(pet=other_pet, user=other_user)
+        self.client.force_authenticate(user=self.cliente)
+
+        response = self.client.get("/api/adoptionrequests/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["user"], self.cliente.id)
+
     def test_duplicate_request_for_same_pet_is_rejected(self):
         AdoptionRequest.objects.create(pet=self.pet, user=self.cliente)
         self.client.force_authenticate(user=self.cliente)
@@ -195,3 +213,8 @@ class AdoptionRequestTests(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_adopters_endpoint_is_not_registered(self):
+        response = self.client.get("/api/adopters/")
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
