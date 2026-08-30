@@ -1,33 +1,8 @@
+import { useCallback, useEffect, useState } from 'react'
 import Footer from '../components/Footer.jsx'
 import Navbar from '../components/Navbar.jsx'
 import PetCard from '../components/PetCard.jsx'
-
-const pets = [
-  {
-    name: 'Luna',
-    type: 'Perra mestiza',
-    age: '2 años',
-    description: 'Dulce, curiosa y fanática de los paseos. Busca una familia con quien compartir aventuras.',
-    emoji: '🐕',
-    color: 'green',
-  },
-  {
-    name: 'Simón',
-    type: 'Gato atigrado',
-    age: '1 año',
-    description: 'Cariñoso y tranquilo. Su plan favorito es dormir al sol y recibir muchos mimos.',
-    emoji: '🐈',
-    color: 'yellow',
-  },
-  {
-    name: 'Milo',
-    type: 'Cachorro mestizo',
-    age: '8 meses',
-    description: 'Juguetón, sociable y lleno de energía. Está listo para aprender junto a vos.',
-    emoji: '🐶',
-    color: 'blue',
-  },
-]
+import { apiRequest, getApiErrorMessage } from '../services/api.js'
 
 const steps = [
   { number: '1', title: 'Elegí', text: 'Conocé a las mascotas que esperan una familia.' },
@@ -36,6 +11,28 @@ const steps = [
 ]
 
 function Home() {
+  const [pets, setPets] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  const loadPets = useCallback(async () => {
+    setIsLoading(true)
+    setError('')
+
+    try {
+      const data = await apiRequest('/pets/', { auth: true })
+      setPets(Array.isArray(data) ? data : data.results || [])
+    } catch (petsError) {
+      setError(getApiErrorMessage(petsError, 'No se pudieron cargar las mascotas.'))
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadPets()
+  }, [loadPets])
+
   return (
     <div className="d-flex flex-column min-vh-100">
       <Navbar />
@@ -86,13 +83,37 @@ function Home() {
               </div>
             </div>
 
-            <div className="row g-4">
-              {pets.map((pet) => (
-                <div className="col-12 col-md-6 col-lg-4" key={pet.name}>
-                  <PetCard {...pet} />
-                </div>
-              ))}
-            </div>
+            {isLoading && (
+              <div className="text-center py-5" role="status">
+                <div className="spinner-border text-success" aria-label="Cargando mascotas" />
+                <p className="text-secondary mt-3 mb-0">Cargando mascotas desde la API…</p>
+              </div>
+            )}
+
+            {!isLoading && error && (
+              <div className="alert alert-danger d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3" role="alert">
+                <span>{error}</span>
+                <button className="btn btn-outline-danger text-nowrap" onClick={loadPets} type="button">
+                  Reintentar
+                </button>
+              </div>
+            )}
+
+            {!isLoading && !error && pets.length === 0 && (
+              <div className="alert alert-info mb-0" role="status">
+                Todavía no hay mascotas cargadas en el sistema.
+              </div>
+            )}
+
+            {!isLoading && !error && pets.length > 0 && (
+              <div className="row g-4">
+                {pets.map((pet, index) => (
+                  <div className="col-12 col-md-6 col-lg-4" key={pet.id}>
+                    <PetCard pet={pet} color={['green', 'yellow', 'blue'][index % 3]} />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 

@@ -1,62 +1,120 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import AuthContext from './auth-context.js'
-
-const initialUsers = [
-  {
-    name: 'Usuario Demo',
-    username: 'demo',
-    password: 'petadopt123',
-  },
-]
+import {
+  apiRequest,
+  clearTokens,
+  getAccessToken,
+  getRefreshToken,
+  saveTokens,
+  SESSION_EXPIRED_EVENT,
+} from '../services/api.js'
 
 export function AuthProvider({ children }) {
-  const [users, setUsers] = useState(initialUsers)
   const [user, setUser] = useState(null)
+  const [isLoadingSession, setIsLoadingSession] = useState(true)
+  const [sessionMessage, setSessionMessage] = useState('')
 
-  const login = (username, password) => {
-    const normalizedUsername = username.trim().toLowerCase()
-    const foundUser = users.find(
-      (candidate) => candidate.username.toLowerCase() === normalizedUsername
-        && candidate.password === password,
-    )
+  useEffect(() => {
+    let isMounted = true
 
-    if (!foundUser) {
-      return {
-        success: false,
-        message: 'El usuario o la contraseña son incorrectos.',
+    const restoreSession = async () => {
+      if (!getAccessToken()) {
+        setIsLoadingSession(false)
+        return
+      }
+
+      try {
+        const profile = await apiRequest('/users/profile/', { auth: true })
+        if (isMounted) {
+          setUser(profile)
+        }
+      } catch (error) {
+        if (isMounted) {
+          const message = error.status === 0
+            ? 'No se pudo validar tu sesión porque la API no está disponible.'
+            : 'Tu sesión venció. Iniciá sesión nuevamente.'
+          setSessionMessage(message)
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingSession(false)
+        }
       }
     }
 
-    setUser({ name: foundUser.name, username: foundUser.username })
-    return { success: true }
-  }
-
-  const register = ({ name, username, password }) => {
-    const cleanName = name.trim()
-    const cleanUsername = username.trim()
-    const usernameExists = users.some(
-      (candidate) => candidate.username.toLowerCase() === cleanUsername.toLowerCase(),
-    )
-
-    if (usernameExists) {
-      return {
-        success: false,
-        message: 'Ese nombre de usuario ya está registrado.',
-      }
+    const handleSessionExpired = () => {
+      setUser(null)
+      setSessionMessage('Tu sesión venció. Iniciá sesión nuevamente.')
     }
 
-    setUsers((currentUsers) => [
-      ...currentUsers,
-      { name: cleanName, username: cleanUsername, password },
-    ])
+    restoreSession()
+    window.addEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired)
 
-    return { success: true }
+    return () => {
+      isMounted = false
+      window.removeEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired)
+    }
+  }, [])
+
+  const login = async (username, password) => {
+    const tokens = await apiRequest('/token/', {
+      method: 'POST',
+      body: JSON.stringify({ username: username.trim(), password }),
+    })
+
+    saveTokens(tokens)
+
+    try {
+      const profile = await apiRequest('/users/profile/', { auth: true })
+      setUser(profile)
+      setSessionMessage('')
+      return profile
+    } catch (error) {
+      clearTokens()
+      throw error
+    }
   }
 
-  const logout = () => setUser(null)
+  const register = async (formData) => {
+    return apiRequest('/users/register/', {
+      method: 'POST',
+      body: JSON.stringify({
+        username: formData.username.trim(),
+        email: formData.email.trim(),
+        password: formData.password,
+        first_name: formData.firstName.trim(),
+        last_name: formData.lastName.trim(),
+      }),
+    })
+  }
+
+  const logout = async () => {
+    const refresh = getRefreshToken()
+
+    try {
+      if (refresh && getAccessToken()) {
+        await apiRequest('/users/logout/', {
+          method: 'POST',
+          auth: true,
+          body: JSON.stringify({ refresh }),
+        })
+      }
+    } finally {
+      clearTokens()
+      setUser(null)
+      setSessionMessage('')
+    }
+  }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, register }}>
+    <AuthContext.Provider value={{
+      user,
+      isLoadingSession,
+      sessionMessage,
+      login,
+      logout,
+      register,
+    }}>
       {children}
     </AuthContext.Provider>
   )

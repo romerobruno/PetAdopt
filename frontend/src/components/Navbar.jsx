@@ -1,13 +1,20 @@
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/useAuth.js'
 
 function Navbar() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
-  const handleLogout = () => {
-    logout()
-    navigate('/login', { replace: true })
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+
+    try {
+      await logout()
+    } finally {
+      navigate('/login', { replace: true })
+    }
   }
 
   return (
@@ -46,10 +53,10 @@ function Navbar() {
             </li>
             <li className="nav-item ms-md-2 d-flex align-items-center gap-2">
               <span className="small text-secondary text-nowrap" title={`Usuario: ${user.username}`}>
-                Hola, {user.name}
+                Hola, {user.first_name || user.username}
               </span>
-              <button className="btn btn-outline-danger text-nowrap" onClick={handleLogout} type="button">
-                Cerrar sesión
+              <button className="btn btn-outline-danger text-nowrap" disabled={isLoggingOut} onClick={handleLogout} type="button">
+                {isLoggingOut ? 'Cerrando…' : 'Cerrar sesión'}
               </button>
             </li>
           </ul>

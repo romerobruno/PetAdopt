@@ -2,9 +2,12 @@ import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import AuthLayout from '../components/AuthLayout.jsx'
 import { useAuth } from '../context/useAuth.js'
+import { getApiErrorMessage } from '../services/api.js'
 
 const emptyForm = {
-  name: '',
+  firstName: '',
+  lastName: '',
+  email: '',
   username: '',
   password: '',
   confirmPassword: '',
@@ -13,10 +16,11 @@ const emptyForm = {
 function Register() {
   const [formData, setFormData] = useState(emptyForm)
   const [error, setError] = useState('')
-  const { user, register } = useAuth()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { user, isLoadingSession, register } = useAuth()
   const navigate = useNavigate()
 
-  if (user) {
+  if (!isLoadingSession && user) {
     return <Navigate to="/" replace />
   }
 
@@ -26,7 +30,7 @@ function Register() {
     setError('')
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
 
     if (formData.password !== formData.confirmPassword) {
@@ -34,14 +38,16 @@ function Register() {
       return
     }
 
-    const result = register(formData)
+    setIsSubmitting(true)
 
-    if (!result.success) {
-      setError(result.message)
-      return
+    try {
+      await register(formData)
+      navigate('/login', { replace: true, state: { registered: true } })
+    } catch (registerError) {
+      setError(getApiErrorMessage(registerError, 'No se pudo crear la cuenta.'))
+    } finally {
+      setIsSubmitting(false)
     }
-
-    navigate('/login', { replace: true, state: { registered: true } })
   }
 
   return (
@@ -60,18 +66,48 @@ function Register() {
 
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
-          <label className="form-label fw-semibold" htmlFor="name">Nombre</label>
+          <label className="form-label fw-semibold" htmlFor="firstName">Nombre</label>
           <input
-            autoComplete="name"
+            autoComplete="given-name"
             autoFocus
             className="form-control"
-            id="name"
-            name="name"
+            id="firstName"
+            name="firstName"
             onChange={handleChange}
             placeholder="Tu nombre"
             required
             type="text"
-            value={formData.name}
+            value={formData.firstName}
+          />
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label fw-semibold" htmlFor="lastName">Apellido</label>
+          <input
+            autoComplete="family-name"
+            className="form-control"
+            id="lastName"
+            name="lastName"
+            onChange={handleChange}
+            placeholder="Tu apellido"
+            required
+            type="text"
+            value={formData.lastName}
+          />
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label fw-semibold" htmlFor="email">Email</label>
+          <input
+            autoComplete="email"
+            className="form-control"
+            id="email"
+            name="email"
+            onChange={handleChange}
+            placeholder="nombre@ejemplo.com"
+            required
+            type="email"
+            value={formData.email}
           />
         </div>
 
@@ -97,10 +133,10 @@ function Register() {
             autoComplete="new-password"
             className="form-control"
             id="register-password"
-            minLength="6"
+            minLength="8"
             name="password"
             onChange={handleChange}
-            placeholder="Mínimo 6 caracteres"
+            placeholder="Mínimo 8 caracteres"
             required
             type="password"
             value={formData.password}
@@ -113,7 +149,7 @@ function Register() {
             autoComplete="new-password"
             className="form-control"
             id="confirm-password"
-            minLength="6"
+            minLength="8"
             name="confirmPassword"
             onChange={handleChange}
             placeholder="Repetí tu contraseña"
@@ -123,8 +159,8 @@ function Register() {
           />
         </div>
 
-        <button className="btn btn-primary btn-lg w-100" type="submit">
-          Registrarme
+        <button className="btn btn-primary btn-lg w-100" disabled={isSubmitting} type="submit">
+          {isSubmitting ? 'Creando cuenta…' : 'Registrarme'}
         </button>
       </form>
     </AuthLayout>

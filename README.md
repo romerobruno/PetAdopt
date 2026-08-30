@@ -62,6 +62,24 @@ Levantar el servidor:
 py manage.py runserver
 ```
 
+### Frontend (TP8)
+
+1. Copiar `frontend/.env.example` como `frontend/.env` y confirmar la URL de la API:
+
+```env
+VITE_API_URL=http://localhost:8000/api
+```
+
+2. Instalar las dependencias y levantar Vite:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+El frontend queda disponible en `http://localhost:3000`. El flujo conectado incluye registro, login JWT, restauracion de sesion, perfil autenticado, listado real de mascotas y logout con invalidacion del refresh token.
+
 ## URLs utiles
 - API base: `http://127.0.0.1:8000/api/`
 - Admin Django: `http://127.0.0.1:8000/admin/`
