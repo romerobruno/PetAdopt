@@ -2,15 +2,17 @@ import { useState } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import AuthLayout from '../components/AuthLayout.jsx'
 import { useAuth } from '../context/useAuth.js'
+import { getApiErrorMessage } from '../services/api.js'
 
 function Login() {
   const [formData, setFormData] = useState({ username: '', password: '' })
   const [error, setError] = useState('')
-  const { user, login } = useAuth()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { user, isLoadingSession, login, sessionMessage } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
 
-  if (user) {
+  if (!isLoadingSession && user) {
     return <Navigate to="/" replace />
   }
 
@@ -20,17 +22,22 @@ function Login() {
     setError('')
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
-    const result = login(formData.username, formData.password)
+    setIsSubmitting(true)
 
-    if (!result.success) {
-      setError(result.message)
-      return
+    try {
+      await login(formData.username, formData.password)
+      const destination = location.state?.from?.pathname || '/'
+      navigate(destination, { replace: true })
+    } catch (loginError) {
+      const message = loginError.status === 401
+        ? 'El usuario o la contraseña son incorrectos.'
+        : getApiErrorMessage(loginError, 'No se pudo iniciar sesión.')
+      setError(message)
+    } finally {
+      setIsSubmitting(false)
     }
-
-    const destination = location.state?.from?.pathname || '/'
-    navigate(destination, { replace: true })
   }
 
   return (
@@ -44,6 +51,12 @@ function Login() {
       {location.state?.registered && (
         <div className="alert alert-success" role="status">
           Tu cuenta fue creada. Ya podés iniciar sesión.
+        </div>
+      )}
+
+      {sessionMessage && !error && (
+        <div className="alert alert-warning" role="alert">
+          {sessionMessage}
         </div>
       )}
 
@@ -85,17 +98,10 @@ function Login() {
           />
         </div>
 
-        <button className="btn btn-primary btn-lg w-100" type="submit">
-          Ingresar
+        <button className="btn btn-primary btn-lg w-100" disabled={isSubmitting} type="submit">
+          {isSubmitting ? 'Ingresando…' : 'Ingresar'}
         </button>
       </form>
-
-      <div className="demo-credentials rounded-3 p-3 mt-4">
-        <p className="small fw-semibold mb-1">Cuenta de prueba</p>
-        <p className="small text-secondary mb-0">
-          Usuario: <strong>demo</strong> · Contraseña: <strong>petadopt123</strong>
-        </p>
-      </div>
     </AuthLayout>
   )
 }
