@@ -18,3 +18,13 @@ class IsClienteAuthenticated(permissions.BasePermission):
     def has_permission(self, request, view):
         user = request.user
         return bool(user and user.is_authenticated and user.role == user.Roles.CLIENTE)
+
+
+class IsAdminOrVendedor(permissions.BasePermission):
+    def has_permission(self, request, view):
+        user = request.user
+        return bool(
+            user
+            and user.is_authenticated
+            and user.role in (user.Roles.ADMIN, user.Roles.VENDEDOR)
+        )

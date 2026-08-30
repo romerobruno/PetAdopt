@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APITestCase
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 User = get_user_model()
@@ -61,3 +62,84 @@ class AuthenticationFlowTests(APITestCase):
         )
 
         self.assertEqual(refresh_response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_register_with_duplicate_email_returns_400(self):
+        User.objects.create_user(
+            username="existente",
+            email="duplicado@example.com",
+            password="Password123",
+        )
+
+        response = self.client.post(
+            "/api/users/register/",
+            {
+                "username": "nuevo",
+                "email": "duplicado@example.com",
+                "password": "Password123",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("email", response.data)
+
+    def test_authenticated_user_can_update_profile(self):
+        user = User.objects.create_user(
+            username="perfil",
+            email="perfil@example.com",
+            password="Password123",
+            first_name="Nombre anterior",
+        )
+        self.client.force_authenticate(user=user)
+
+        response = self.client.patch(
+            "/api/users/profile/",
+            {
+                "first_name": "Ana",
+                "last_name": "Pérez",
+                "telefono": "1122334455",
+                "direccion": "Calle 123",
+                "role": User.Roles.ADMIN,
+                "email": "otro@example.com",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        user.refresh_from_db()
+        self.assertEqual(user.first_name, "Ana")
+        self.assertEqual(user.last_name, "Pérez")
+        self.assertEqual(user.telefono, "1122334455")
+        self.assertEqual(user.direccion, "Calle 123")
+        self.assertEqual(user.role, User.Roles.CLIENTE)
+        self.assertEqual(user.email, "perfil@example.com")
+
+    def test_logout_with_invalid_or_reused_token_returns_400(self):
+        user = User.objects.create_user(
+            username="logout",
+            email="logout@example.com",
+            password="Password123",
+        )
+        self.client.force_authenticate(user=user)
+
+        invalid_response = self.client.post(
+            "/api/users/logout/",
+            {"refresh": "token-invalido"},
+            format="json",
+        )
+        self.assertEqual(invalid_response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        refresh = str(RefreshToken.for_user(user))
+        first_response = self.client.post(
+            "/api/users/logout/",
+            {"refresh": refresh},
+            format="json",
+        )
+        second_response = self.client.post(
+            "/api/users/logout/",
+            {"refresh": refresh},
+            format="json",
+        )
+
+        self.assertEqual(first_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(second_response.status_code, status.HTTP_400_BAD_REQUEST)
