@@ -2,12 +2,20 @@ from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 from rest_framework import permissions, status, viewsets
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
 
 from .models import AdoptionRequest, Pet
 from .permissions import IsAdminOrVendedor, IsAdminOrVendedorForWrite, IsClienteAuthenticated
-from .serializers import AdoptionRequestSerializer, PetSerializer
+from .serializers import AdoptionRequestSerializer, HealthCheckSerializer, PetSerializer
+
+
+@extend_schema(responses=HealthCheckSerializer)
+@api_view(["GET"])
+@permission_classes([permissions.AllowAny])
+def health_check(request):
+    return Response({"status": "ok", "service": "api"}, status=status.HTTP_200_OK)
 
 
 class PetViewSet(viewsets.ModelViewSet):

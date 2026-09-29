@@ -5,6 +5,14 @@ from rest_framework import serializers
 User = get_user_model()
 
 
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField(write_only=True)
+
+
+class DetailSerializer(serializers.Serializer):
+    detail = serializers.CharField()
+
+
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
 

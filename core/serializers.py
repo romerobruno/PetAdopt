@@ -1,5 +1,11 @@
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 from .models import AdoptionRequest, Pet
+
+
+class HealthCheckSerializer(serializers.Serializer):
+    status = serializers.CharField()
+    service = serializers.CharField()
 
 
 class PetSerializer(serializers.ModelSerializer):
@@ -40,6 +46,18 @@ class AdoptionRequestSerializer(serializers.ModelSerializer):
         read_only_fields = ("id", "user", "status", "created_at", "updated_at")
         validators = []
 
+    @extend_schema_field(
+        {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "username": {"type": "string"},
+                "first_name": {"type": "string"},
+                "last_name": {"type": "string"},
+                "email": {"type": "string", "format": "email"},
+            },
+        }
+    )
     def get_user_detail(self, obj):
         return {
             "id": obj.user_id,
