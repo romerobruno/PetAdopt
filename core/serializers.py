@@ -13,6 +13,7 @@ class PetSerializer(serializers.ModelSerializer):
             "age",
             "description",
             "image",
+            "is_available",
             "created_at",
             "updated_at",
         )
@@ -20,11 +21,33 @@ class PetSerializer(serializers.ModelSerializer):
 
 
 class AdoptionRequestSerializer(serializers.ModelSerializer):
+    pet_detail = PetSerializer(source="pet", read_only=True)
+    user_detail = serializers.SerializerMethodField()
+
     class Meta:
         model = AdoptionRequest
-        fields = ("id", "pet", "user", "message", "is_approved", "created_at", "updated_at")
-        read_only_fields = ("id", "user", "is_approved", "created_at", "updated_at")
+        fields = (
+            "id",
+            "pet",
+            "pet_detail",
+            "user",
+            "user_detail",
+            "message",
+            "status",
+            "created_at",
+            "updated_at",
+        )
+        read_only_fields = ("id", "user", "status", "created_at", "updated_at")
         validators = []
+
+    def get_user_detail(self, obj):
+        return {
+            "id": obj.user_id,
+            "username": obj.user.username,
+            "first_name": obj.user.first_name,
+            "last_name": obj.user.last_name,
+            "email": obj.user.email,
+        }
 
     def validate(self, attrs):
         request = self.context["request"]
@@ -37,6 +60,11 @@ class AdoptionRequestSerializer(serializers.ModelSerializer):
         if duplicate.exists():
             raise serializers.ValidationError(
                 {"pet": "Ya enviaste una solicitud de adopción para esta mascota."}
+            )
+
+        if pet and not pet.is_available:
+            raise serializers.ValidationError(
+                {"pet": "Esta mascota ya no está disponible para adopción."}
             )
 
         return attrs

@@ -1,4 +1,6 @@
-function getPetEmoji(species) {
+import { Link } from 'react-router-dom'
+
+function getPetEmoji(species = '') {
   const normalizedSpecies = species.toLowerCase()
 
   if (normalizedSpecies.includes('gat')) return '🐈'
@@ -25,14 +27,14 @@ function PetCard({ pet, color }) {
             <h3 className="h4 card-title fw-bold mb-1">{pet.name}</h3>
             <p className="text-secondary small mb-0">{type} · {age}</p>
           </div>
-          <span className="badge rounded-pill text-bg-success">En adopción</span>
+          <span className={`badge rounded-pill ${pet.is_available ? 'text-bg-success' : 'text-bg-secondary'}`}>{pet.is_available ? 'En adopción' : 'Adoptada'}</span>
         </div>
         <p className="card-text text-secondary mt-3">
           {pet.description || 'Esta mascota está esperando una familia que le dé mucho amor.'}
         </p>
-        <a className="btn btn-outline-success w-100 mt-2" href="#contacto" aria-label={`Conocer más sobre ${pet.name}`}>
+        <Link className="btn btn-outline-success w-100 mt-2" to={`/mascotas/${pet.id}`} aria-label={`Conocer más sobre ${pet.name}`}>
           Conocer más
-        </a>
+        </Link>
       </div>
     </article>
   )

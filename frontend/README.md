@@ -14,14 +14,17 @@ npm install
 npm run dev
 ```
 
-La aplicación define las rutas `/`, `/login` y `/register`. La Home (`/`) está protegida y redirige al Login cuando no hay una sesión activa.
+Crear `frontend/.env` con:
 
-## Cuenta de prueba
+```env
+VITE_API_URL=http://localhost:8000/api
+```
 
-- Usuario: `demo`
-- Contraseña: `petadopt123`
+La aplicación define rutas públicas para la Home, el catálogo y el detalle. El historial, perfil y panel administrativo consumen la API Django mediante JWT.
 
-También es posible crear usuarios desde Registro. Tanto las cuentas nuevas como la sesión se almacenan solamente en memoria: se eliminan al recargar la página, ya que en este trabajo práctico no se conecta el frontend al backend.
+Los usuarios creados desde Registro reciben el rol `CLIENTE`. Para probar el panel, crear un superusuario en Django y asignarle rol `ADMIN` desde `http://localhost:8000/admin/`.
+
+Consultar todas las rutas y permisos en [`../docs/tp9-rutas.md`](../docs/tp9-rutas.md).
 
 ## Verificación
 

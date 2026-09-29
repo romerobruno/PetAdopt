@@ -64,7 +64,7 @@ Levantar el servidor:
 py manage.py runserver
 ```
 
-### Frontend (TP8)
+### Frontend (TP9)
 
 1. Copiar `frontend/.env.example` como `frontend/.env` y confirmar la URL de la API:
 
@@ -80,7 +80,15 @@ npm install
 npm run dev
 ```
 
-El frontend queda disponible en `http://localhost:3000`. El flujo conectado incluye registro, login JWT, restauracion de sesion, perfil autenticado, listado real de mascotas y logout con invalidacion del refresh token.
+El frontend queda disponible en `http://localhost:3000`. La Home, el catálogo y el detalle son públicos. El flujo conectado incluye registro, login JWT, restauración de sesión, perfil editable, solicitudes de adopción y un panel de administración protegido por roles.
+
+Antes de iniciar el backend después de actualizar el proyecto, aplicar la migración del TP9:
+
+```bash
+py manage.py migrate
+```
+
+La migración conserva las solicitudes aprobadas existentes y marca sus mascotas como no disponibles.
 
 ## URLs utiles
 - API base: `http://127.0.0.1:8000/api/`
@@ -95,6 +103,36 @@ El frontend queda disponible en `http://localhost:3000`. El flujo conectado incl
 - Rechazar solicitud: `POST http://127.0.0.1:8000/api/adoptionrequests/{id}/reject/`
 - Swagger UI: `http://127.0.0.1:8000/api/docs/`
 - OpenAPI schema: `http://127.0.0.1:8000/api/schema/`
+
+La documentación completa de las rutas del frontend, parámetros y permisos de la API está en [`docs/tp9-rutas.md`](docs/tp9-rutas.md).
+
+## Trabajo Práctico Nro. 9: aplicación completa
+
+El dominio de la consigna se adaptó a una plataforma de adopciones:
+
+- `Pet` es el recurso administrable equivalente a producto.
+- `AdoptionRequest` reemplaza el flujo genérico de carrito, checkout y pedido.
+- Las solicitudes tienen estados `PENDING`, `APPROVED` y `REJECTED`.
+- Al aprobar una solicitud, la mascota deja de estar disponible y las otras solicitudes pendientes para ella se rechazan.
+- Si se revierte una aprobación rechazando esa solicitud, la mascota vuelve a estar disponible.
+- Las búsquedas por texto, especie y disponibilidad se procesan en la API.
+- `CLIENTE` puede solicitar adopciones y consultar solamente su historial.
+- `ADMIN` y `VENDEDOR` pueden gestionar mascotas y resolver todas las solicitudes.
+
+### Verificación
+
+Desde la raíz:
+
+```bash
+py manage.py test
+```
+
+Desde `frontend/`:
+
+```bash
+npm run lint
+npm run build
+```
 
 ## Trabajo Practico Nro. 3: Identidad, roles y JWT
 El proyecto usa un usuario custom en la app `users`:
