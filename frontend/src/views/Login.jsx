@@ -11,9 +11,10 @@ function Login() {
   const { user, isLoadingSession, login, sessionMessage } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const destination = location.state?.from?.pathname || '/'
 
   if (!isLoadingSession && user) {
-    return <Navigate to="/" replace />
+    return <Navigate to={destination} replace />
   }
 
   const handleChange = (event) => {
@@ -28,7 +29,6 @@ function Login() {
 
     try {
       await login(formData.username, formData.password)
-      const destination = location.state?.from?.pathname || '/'
       navigate(destination, { replace: true })
     } catch (loginError) {
       const message = loginError.status === 401

@@ -10,6 +10,7 @@ class Pet(models.Model):
     age = models.PositiveIntegerField("Age (years)")
     description = models.TextField(blank=True)
     image = models.ImageField(upload_to="pets/", blank=True, null=True, help_text="Foto de la mascota (opcional)")
+    is_available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -18,10 +19,15 @@ class Pet(models.Model):
 
 class AdoptionRequest(models.Model):
     """Solicitud de adopción de un usuario para una mascota."""
+    class Status(models.TextChoices):
+        PENDING = "PENDING", "Pendiente"
+        APPROVED = "APPROVED", "Aprobada"
+        REJECTED = "REJECTED", "Rechazada"
+
     pet = models.ForeignKey(Pet, on_delete=models.CASCADE, related_name="adoption_requests")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="adoption_requests")
     message = models.TextField(blank=True)
-    is_approved = models.BooleanField(default=False)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -14,6 +14,17 @@ class PetAccessTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_public_pet_filters_use_api_data(self):
+        Pet.objects.create(name="Luna", species="Perro", breed="Mestiza", age=2)
+        Pet.objects.create(name="Milo", species="Gato", age=1, is_available=False)
+
+        response = self.client.get("/api/pets/?search=lun&species=perro&available=true")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["name"], "Luna")
+        self.assertTrue(response.data[0]["is_available"])
+
     def test_pet_create_without_token_returns_401(self):
         response = self.client.post(
             "/api/pets/",
@@ -145,7 +156,7 @@ class AdoptionRequestTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         adoption_request = AdoptionRequest.objects.get()
         self.assertEqual(adoption_request.user, self.cliente)
-        self.assertFalse(adoption_request.is_approved)
+        self.assertEqual(adoption_request.status, AdoptionRequest.Status.PENDING)
 
     def test_cliente_only_lists_own_adoption_requests(self):
         other_user = User.objects.create_user(
@@ -186,14 +197,48 @@ class AdoptionRequestTests(APITestCase):
         )
         self.assertEqual(approve_response.status_code, status.HTTP_200_OK)
         adoption_request.refresh_from_db()
-        self.assertTrue(adoption_request.is_approved)
+        self.assertEqual(adoption_request.status, AdoptionRequest.Status.APPROVED)
+        self.pet.refresh_from_db()
+        self.assertFalse(self.pet.is_available)
 
         reject_response = self.client.post(
             f"/api/adoptionrequests/{adoption_request.pk}/reject/"
         )
         self.assertEqual(reject_response.status_code, status.HTTP_200_OK)
         adoption_request.refresh_from_db()
-        self.assertFalse(adoption_request.is_approved)
+        self.assertEqual(adoption_request.status, AdoptionRequest.Status.REJECTED)
+        self.pet.refresh_from_db()
+        self.assertTrue(self.pet.is_available)
+
+    def test_approving_request_rejects_other_pending_requests(self):
+        other_user = User.objects.create_user(
+            username="otro-postulante",
+            email="otro-postulante@example.com",
+            password="Password123",
+            role=User.Roles.CLIENTE,
+        )
+        selected = AdoptionRequest.objects.create(pet=self.pet, user=self.cliente)
+        other = AdoptionRequest.objects.create(pet=self.pet, user=other_user)
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.post(f"/api/adoptionrequests/{selected.pk}/approve/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        other.refresh_from_db()
+        self.assertEqual(other.status, AdoptionRequest.Status.REJECTED)
+
+    def test_unavailable_pet_rejects_new_request(self):
+        self.pet.is_available = False
+        self.pet.save(update_fields=["is_available"])
+        self.client.force_authenticate(user=self.cliente)
+
+        response = self.client.post(
+            "/api/adoptionrequests/",
+            {"pet": self.pet.pk, "message": "Me gustaría adoptarlo."},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_admin_can_list_requests(self):
         AdoptionRequest.objects.create(pet=self.pet, user=self.cliente)
@@ -203,6 +248,30 @@ class AdoptionRequestTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["pet_detail"]["name"], self.pet.name)
+        self.assertEqual(response.data[0]["user_detail"]["username"], self.cliente.username)
+
+    def test_admin_can_filter_requests_by_status(self):
+        AdoptionRequest.objects.create(pet=self.pet, user=self.cliente)
+        other_pet = Pet.objects.create(name="Lola", species="Perro", age=4)
+        other_user = User.objects.create_user(
+            username="cliente-rechazado",
+            email="cliente-rechazado@example.com",
+            password="Password123",
+            role=User.Roles.CLIENTE,
+        )
+        AdoptionRequest.objects.create(
+            pet=other_pet,
+            user=other_user,
+            status=AdoptionRequest.Status.REJECTED,
+        )
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.get("/api/adoptionrequests/?status=PENDING")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["status"], AdoptionRequest.Status.PENDING)
 
     def test_cliente_cannot_approve_request(self):
         adoption_request = AdoptionRequest.objects.create(pet=self.pet, user=self.cliente)
@@ -213,6 +282,15 @@ class AdoptionRequestTests(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_cliente_cannot_delete_request(self):
+        adoption_request = AdoptionRequest.objects.create(pet=self.pet, user=self.cliente)
+        self.client.force_authenticate(user=self.cliente)
+
+        response = self.client.delete(f"/api/adoptionrequests/{adoption_request.pk}/")
+
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertTrue(AdoptionRequest.objects.filter(pk=adoption_request.pk).exists())
 
     def test_adopters_endpoint_is_not_registered(self):
         response = self.client.get("/api/adopters/")

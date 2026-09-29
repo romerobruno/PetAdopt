@@ -114,6 +114,7 @@ export function AuthProvider({ children }) {
       login,
       logout,
       register,
+      setCurrentUser: setUser,
     }}>
       {children}
     </AuthContext.Provider>
