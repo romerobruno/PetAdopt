@@ -46,7 +46,6 @@ function Catalog() {
         <div className="container">
           <p className="section-eyebrow fw-bold mb-2">Encontrá a tu compañero</p>
           <h1 className="display-5 fw-bold mb-2">Mascotas en adopción</h1>
-          <p className="text-secondary mb-0">Todos los datos de este catálogo se obtienen de la API.</p>
         </div>
       </section>
 
